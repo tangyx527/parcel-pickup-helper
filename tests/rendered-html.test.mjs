@@ -26,12 +26,17 @@ test("renders the parcel pickup app shell", async () => {
 });
 
 test("includes installable offline assets", async () => {
-  const [manifest, serviceWorker] = await Promise.all([
+  const [manifest, serviceWorker, page] = await Promise.all([
     readFile(new URL("../app/manifest.ts", import.meta.url), "utf8"),
     readFile(new URL("../public/sw.js", import.meta.url), "utf8"),
+    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
   ]);
   assert.match(manifest, /display:\s*"standalone"/);
   assert.match(manifest, /start_url:\s*"\/"/);
   assert.match(serviceWorker, /caches\.open/);
   assert.match(serviceWorker, /request\.mode === "navigate"/);
+  assert.match(serviceWorker, /SKIP_WAITING/);
+  assert.match(page, /保存并继续/);
+  assert.match(page, /addEventListener\("storage"/);
+  assert.match(page, /本机访客模式/);
 });
