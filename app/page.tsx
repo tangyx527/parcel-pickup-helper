@@ -25,6 +25,7 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 const STORAGE_KEY = "parcel-pickup-list-v1";
+const UNDO_TOAST_MS = 2_000;
 const emptyDraft: Draft = { owner: "", name: "", tracking: "", pickupCode: "", location: "", note: "" };
 const newId = () => globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 const formatDateTime = (value: string | null) => value ? new Intl.DateTimeFormat("zh-CN", { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(value)) : "";
@@ -152,7 +153,7 @@ export default function Home() {
 
   useEffect(() => {
     if (!toast) return;
-    const timer = window.setTimeout(() => setToast(null), 8000);
+    const timer = window.setTimeout(() => setToast(null), UNDO_TOAST_MS);
     return () => window.clearTimeout(timer);
   }, [toast]);
 
@@ -229,7 +230,7 @@ export default function Home() {
     setToast({ message: "已恢复到待拿清单" });
   };
   const deleteParcel = (item: Parcel) => {
-    if (!window.confirm(`确定删除“${item.name}”吗？删除后可在 8 秒内撤销。`)) return;
+    if (!window.confirm(`确定删除“${item.name}”吗？删除后可在 2 秒内撤销。`)) return;
     setParcels((current) => current.filter((parcel) => parcel.id !== item.id)); setActionId(null);
     showToast(`已删除“${item.name}”`, () => restoreItems([item]));
   };
@@ -302,7 +303,7 @@ export default function Home() {
         <label><span>快递单号 *</span><input className="mono-input" inputMode="text" maxLength={50} value={draft.tracking} onChange={(event) => setDraft({ ...draft, tracking: event.target.value })} placeholder="输入数字或字母" required/></label>
         <details open={Boolean(draft.pickupCode || draft.location || draft.note)}><summary>＋ 更多信息（可选）</summary><div className="optional-fields"><div className="form-grid"><label><span>取件码</span><input maxLength={30} value={draft.pickupCode} onChange={(event) => setDraft({ ...draft, pickupCode: event.target.value })} placeholder="例如 3-12-08"/></label><label><span>驿站 / 柜机</span><input maxLength={40} value={draft.location} onChange={(event) => setDraft({ ...draft, location: event.target.value })} placeholder="例如 东门菜鸟"/></label></div>{recentLocations.length > 0 && <div className="quick-picks compact"><span>最近位置</span><div>{recentLocations.map((location) => <button type="button" className={draft.location === location ? "active" : ""} onClick={() => setDraft({ ...draft, location })} key={location}>{location}</button>)}</div></div>}<label><span>备注</span><textarea maxLength={120} value={draft.note} onChange={(event) => setDraft({ ...draft, note: event.target.value })} placeholder="需要特别记住的事"/></label></div></details>
         {editingId ? <div className="sheet-actions"><button type="button" className="secondary-button" onClick={() => setSheet(null)}>取消</button><button type="submit" className="primary-button">保存修改</button></div> : <div className="sheet-actions continue-actions"><button type="submit" value="continue" className="secondary-button">保存并继续</button><button type="submit" value="close" className="primary-button">保存完成</button></div>}
-      </form> : <div className="settings-content"><div className="privacy-note"><span>⌖</span><p><strong>你的快递数据不会上传</strong><small>本机访客模式：无需登录，更换手机前请先导出备份。</small></p></div>{installPrompt ? <button className="settings-button" onClick={installApp}><span>▣</span><p><strong>添加到手机桌面</strong><small>像 App 一样打开，断网也能使用</small></p><b>›</b></button> : <div className="install-hint">安装方法：打开浏览器菜单，选择“添加到主屏幕”。</div>}<button className="settings-button" onClick={exportBackup}><span>↓</span><p><strong>导出备份</strong><small>保存 {parcels.length} 条记录到文件</small></p><b>›</b></button><label className="settings-button file-button"><span>↑</span><p><strong>导入备份</strong><small>用备份文件恢复记录</small></p><b>›</b><input type="file" accept="application/json,.json" onChange={importBackup}/></label><button className="settings-button danger-setting" onClick={clearAll} disabled={!parcels.length}><span>×</span><p><strong>清空全部数据</strong><small>删除后可在 8 秒内撤销</small></p></button></div>}
+      </form> : <div className="settings-content"><div className="privacy-note"><span>⌖</span><p><strong>你的快递数据不会上传</strong><small>本机访客模式：无需登录，更换手机前请先导出备份。</small></p></div>{installPrompt ? <button className="settings-button" onClick={installApp}><span>▣</span><p><strong>添加到手机桌面</strong><small>像 App 一样打开，断网也能使用</small></p><b>›</b></button> : <div className="install-hint">安装方法：打开浏览器菜单，选择“添加到主屏幕”。</div>}<button className="settings-button" onClick={exportBackup}><span>↓</span><p><strong>导出备份</strong><small>保存 {parcels.length} 条记录到文件</small></p><b>›</b></button><label className="settings-button file-button"><span>↑</span><p><strong>导入备份</strong><small>用备份文件恢复记录</small></p><b>›</b><input type="file" accept="application/json,.json" onChange={importBackup}/></label><button className="settings-button danger-setting" onClick={clearAll} disabled={!parcels.length}><span>×</span><p><strong>清空全部数据</strong><small>删除后可在 2 秒内撤销</small></p></button></div>}
     </section></div>}
     {toast && <div className="toast" role="status" aria-live="polite"><span>{toast.message}</span>{toast.onAction && <button onClick={() => { toast.onAction?.(); setToast(null); }}>{toast.actionLabel}</button>}</div>}
   </main>;

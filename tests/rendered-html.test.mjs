@@ -39,4 +39,6 @@ test("includes installable offline assets", async () => {
   assert.match(page, /保存并继续/);
   assert.match(page, /addEventListener\("storage"/);
   assert.match(page, /本机访客模式/);
+  assert.match(page, /UNDO_TOAST_MS = 2_000/);
+  assert.doesNotMatch(page, /8 秒内撤销/);
 });
