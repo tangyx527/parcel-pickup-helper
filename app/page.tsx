@@ -119,7 +119,8 @@ export default function Home() {
     navigator.serviceWorker?.addEventListener("controllerchange", handleControllerChange);
 
     if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("/sw.js").then((registration) => {
+      const serviceWorkerUrl = new URL("sw.js", document.baseURI).pathname;
+      navigator.serviceWorker.register(serviceWorkerUrl).then((registration) => {
         if (registration.waiting) setUpdateRegistration(registration);
         registration.addEventListener("updatefound", () => {
           const worker = registration.installing;
